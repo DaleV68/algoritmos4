@@ -29,22 +29,39 @@
         FD CONS1 LABEL RECORD IS STANDARD
                  VALUE OF FILE-ID IS "cons1.dat".
 
-        FD CONS1 LABEL RECORD IS STANDARD
-                 VALUE OF FILE-ID IS "cons2.dat".
-		 
-        FD CONS1 LABEL RECORD IS STANDARD
-                 VALUE OF FILE-ID IS "cons3.dat".
-		 
-        01 CONS.	
-           03 CONS-CUIT-CONS          PIC 9(15).
-           03 CONS-FECHA-ALTA         PIC X(10).
-           03 CONS-FECHA-BAJA         PIC X(10).
-           03 CONS-ESTADO             PIC 9(02).
-           03 CONS-NOMBRE-CONSORCIO   PIC X(30).
-           03 CONS-TEL                PIC X(15).
-           03 CONS-DIR                PIC X(30).
-      * No se si esta bien uno solo o hay que hacer uno por Archivo Cons
+        01 CONS1.	
+           03 CONS1-CUIT-CONS          PIC 9(15).
+           03 CONS1-FECHA-ALTA         PIC X(10).
+           03 CONS1-FECHA-BAJA         PIC X(10).
+           03 CONS1-ESTADO             PIC 9(02).
+           03 CONS1-NOMBRE-CONSORCIO   PIC X(30).
+           03 CONS1-TEL                PIC X(15).
+           03 CONS1-DIR                PIC X(30).
       
+        FD CONS2 LABEL RECORD IS STANDARD
+                 VALUE OF FILE-ID IS "cons2.dat".
+      
+        01 CONS2.	
+           03 CONS2-CUIT-CONS          PIC 9(15).
+           03 CONS2-FECHA-ALTA         PIC X(10).
+           03 CONS2-FECHA-BAJA         PIC X(10).
+           03 CONS2-ESTADO             PIC 9(02).
+           03 CONS2-NOMBRE-CONSORCIO   PIC X(30).
+           03 CONS2-TEL                PIC X(15).
+           03 CONS2-DIR                PIC X(30).
+      
+        FD CONS3 LABEL RECORD IS STANDARD
+                 VALUE OF FILE-ID IS "cons3.dat".
+	
+        01 CONS3.
+           03 CONS3-CUIT-CONS          PIC 9(15).
+           03 CONS3-FECHA-ALTA         PIC X(10).
+           03 CONS3-FECHA-BAJA         PIC X(10).
+           03 CONS3-ESTADO             PIC 9(02).
+           03 CONS3-NOMBRE-CONSORCIO   PIC X(30).
+           03 CONS3-TEL                PIC X(15).
+           03 CONS3-DIR                PIC X(30).
+            
         FD CUENTAS LABEL RECORD IS STANDARD
                    VALUE OF FILE-ID IS "cuentas.dat".
 
@@ -91,12 +108,23 @@
         77 WS_CANT_LINEAS     PIC 99.
         77 WS_NRO_HOJA        PIC 99.
         77 WS_CONT_ANIO       PIC 9(10).
+        01 WS_CONS_MENOR 
+           03 WS_CONS_MENOR-CUIT-CONS          PIC 9(15).
+           03 WS_CONS_MENOR-FECHA-ALTA         PIC X(10).
+           03 WS_CONS_MENOR-FECHA-BAJA         PIC X(10).
+           03 WS_CONS_MENOR-ESTADO             PIC 9(02).
+           03 WS_CONS_MENOR-NOMBRE-CONSORCIO   PIC X(30).
+           03 WS_CONS_MENOR-TEL                PIC X(15).
+           03 WS_CONS_MENOR-DIR                PIC X(30).
+      
       
 	PROCEDURE DIVISION.
 		perform INICIALIZAR.
 		perform ABRIR-ARCHIVOS.
 		perform GEN-TABLA-ESTADOS.
-		perform LEO-CONSORCIOS.
+		perform LEO-CONSORCIO-1.
+                perform LEO-CONSORCIO-2.
+                perform LEO-CONSORCIO-3.
 		perform LEO-CUENTAS.
 		perform IMPRIMO-ENCABEZADO.
 		perform CICLO-CONSORCIO.
@@ -144,16 +172,75 @@
       
 	GEN-TABLA-ESTADOS.
 		DISPLAY "GEN-TABLA-ESTADOS".
-	LEO-CONSORCIOS.
-		DISPLAY "LEO-CONSORCIOS".
-	LEO-CUENTAS.
+	
+        LEO-CONSORCIO-1.
+		DISPLAY "LEO-CONSORCIOS INICIA".
+                READ CONS1.
+                IF FS_CONS1 NOT = ZERO
+                  DISPLAY "Error al leer Archivo de Consorcios 1: " FS_CONS1
+                  STOP RUN.
+        LEO-CONSORCIO-2.
+                READ CONS2.
+                IF FS_CONS2 NOT = ZERO
+                  DISPLAY "Error al leer Archivo de Consorcios 1: " FS_CONS2
+                  STOP RUN.
+        LEO-CONSORCIO-3.
+                READ CONS3.
+                IF FS_CONS3 NOT = ZERO
+                  DISPLAY "Error al leer Archivo de Consorcios 1: " FS_CONS3
+                  STOP RUN.
+              	
+      
+        LEO-CUENTAS.
 		DISPLAY "LEO-CUENTAS".
+                READ CUENTAS.
+                IF FS_CTA NOT = ZERO
+                  DISPLAY "Error al leer Archivo de Consorcios 1: " FS_CTA
+                  STOP RUN.
+      
 	IMPRIMO-ENCABEZADO.
 		DISPLAY "IMPRIMO-ENCABEZADO".
+      
+      
 	IMPRIMO-BAJAS.
 		DISPLAY "IMPRIMO-BAJAS".
-	CICLO-CONSORCIO.
+	
+        CICLO-CONSORCIO.
 		DISPLAY "CICLO-CONSORCIO".
+                PERFORM DET-MENOR.
+                PERFORM POS-CUENTAS UNTIL FS_CTA = '23' 
+                                          OR CTA-CUIT-CONS >= WS_CONS_MENOR-CUIT-CONS. 
+                PERFORM POS-CONSORN1 UNTIL FS_CONS1 = '23' 
+                                          OR CONS1-CUIT-CONS <> WS_CONS_MENOR-CUIT-CONS. 
+                PERFORM POS-CONSORN2 UNTIL FS_CONS2 = '23' 
+                                          OR CONS2-CUIT-CONS <> WS_CONS_MENOR-CUIT-CONS. 
+                PERFORM POS-CONSORN3 UNTIL FS_CONS3 = '23' 
+                                          OR CONS3-CUIT-CONS <> WS_CONS_MENOR-CUIT-CONS. 
+                PERFORM OBTENER-ESTADO.
+                IF WS_CONS_MENOR-ESTADO = '02'
+                   PERFORM LISTAR-BAJA.
+                ELSE
+                   PERFORM ALTA-MAESTRO.
+        
+      
+        DET-MENOR.
+                DISPLAY "DET.MENOR".
+      
+        POS-CUENTAS.
+                DISPLAY "POS-CUENTAS".
+      
+        POS-CONSORN1.
+                DISPLAY "POS-CONSORN1".
+        POS-CONSORN2.
+                DISPLAY "POS-CONSORN2".
+        POS-CONSORN3.
+                DISPLAY "POS-CONSORN3".
+        OBTENER-ESTADO.
+                DISPLAY "OBTENER ESTADO".
+        LISTAR-BAJA.
+                DISPLAY "LISTAR BAJA".
+        ALTA-MAESTRO
+                DISPLAY "ALTA MAESTRO".
 	MOSTRAR-ESTADISTICAS.
 		DISPLAY "MOSTRAR-ESTADISTICAS".
 	CERRAR-ARCHIVOS.
