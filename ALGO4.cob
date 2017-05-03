@@ -86,6 +86,11 @@
         77 FS_CTAS        PIC 99. 
         77 FS_EST         PIC 99.      
         77 FS_MAE         PIC 99. 
+        77 WS_CANT_CONSORCIOS PIC 9(10).
+        77 WS_CANT_BAJAS      PIC 9(10).
+        77 WS_CANT_LINEAS     PIC 99.
+        77 WS_NRO_HOJA        PIC 99.
+        77 WS_CONT_ANIO       PIC 9(10).
       
 	PROCEDURE DIVISION.
 		perform INICIALIZAR.
@@ -101,9 +106,42 @@
 	STOP RUN.
 
 	INICIALIZAR.
-		DISPLAY "INICIALIZAR".
+		DISPLAY "INICIALIZAR INICIA".
+                MOVE 0 TO WS_CANT_CONSORCIOS.
+                MOVE 0 TO WS_CANT_BAJAS.
+                MOVE 1 TO WS_NRO_HOJA.
+                MOVE 0 TO WS_CONT_ANIO.
+                DISPLAY "INICIALIZAR FIN".
+      
 	ABRIR-ARCHIVOS.
-		DISPLAY "ABRIR-ARCHIVOS".
+		DISPLAY "ABRIR-ARCHIVOS INICIA".
+                OPEN INPUT CONS1.
+                IF FS_CONS1 NOT = ZERO
+                   DISPLAY "Error al abrir Archivo de Consorcios 1: " FS_CONS1
+                   STOP RUN.
+                OPEN INPUT CONS2.
+                IF FS_CONS2 NOT = ZERO
+                   DISPLAY "Error al abrir Archivo de Consorcios 2: " FS_CONS2
+                   STOP RUN.
+                OPEN INPUT CONS3.
+                IF FS_CONS3 NOT = ZERO
+                   DISPLAY "Error al abrir Archivo de Consorcios 3: " FS_CONS3
+                   STOP RUN.
+      
+                OPEN INPUT CUENTAS.
+                IF FS_CTA NOT = ZERO
+                   DISPLAY "Error al abrir Archivo de Cuentas: " FS_CTA
+                   STOP RUN.
+      
+                OPEN INPUT ESTADOS.
+                IF FS_EST NOT = ZERO
+                   DISPLAY "Error al abrir Archivo de Estados: " FS_EST
+                   STOP RUN.
+      
+                OPEN OUTPUT MESTRO.
+                OPEN OUTPUT LISTADO_BAJAS.
+                DISPLAY "ABRIR-ARCHIVOS FIN".
+      
 	GEN-TABLA-ESTADOS.
 		DISPLAY "GEN-TABLA-ESTADOS".
 	LEO-CONSORCIOS.
